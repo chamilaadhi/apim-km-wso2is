@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>wso2is.key.manager.operations.endpoint</artifactId>
-    <name>WSO2IS User Info Rest API</name>
+    <name>WSO2IS Keymanager operations Rest API</name>
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
 
