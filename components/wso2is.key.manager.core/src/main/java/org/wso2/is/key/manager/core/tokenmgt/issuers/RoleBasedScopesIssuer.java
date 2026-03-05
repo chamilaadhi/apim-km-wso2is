@@ -802,4 +802,15 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer implements Scope
         }
         return null;
     }
+
+    private boolean isSystemScopeIssuerAvailable() {
+        String systemScopeIssuerClassName = "org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer";
+        List<ScopeValidator> list = ServiceReferenceHolder.getInstance().getScopeValidators();
+        for (ScopeValidator scopeValidator : list) {
+            if (StringUtils.equalsIgnoreCase(scopeValidator.getName(), systemScopeIssuerClassName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
