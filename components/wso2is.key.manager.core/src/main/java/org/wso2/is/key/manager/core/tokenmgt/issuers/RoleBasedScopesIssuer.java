@@ -300,7 +300,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer implements Scope
             requestedScopes = new ArrayList<>(Arrays.asList(oAuthAuthzReqMessageContext.getApprovedScope()));
             boolean isRestrictApimRestApiScopes = ServiceReferenceHolder.isRestrictApimRestApiScopes();
             boolean isRestrictUnassignedScopes = ServiceReferenceHolder.isRestrictUnassignedScopes();
-            if (!(isRestrictUnassignedScopes && isRestrictApimRestApiScopes)) {
+            if (!isSystemScopeIssuerAvailable()) {
                 for (String scope : requestedScopes) {
                     // If requestedScopes contains Product REST APIs (Publisher/DevPortal/Admin) scopes, just let
                     // them pass to the final scope list returned from RoleBasedScopeIssuer. This is because
@@ -313,7 +313,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer implements Scope
             }
             requestedScopes.removeAll(scopes);
             if (requestedScopes.isEmpty()) {
-                return getAllowedScopes(scopes);
+                return getAllowedScopes(new ArrayList<>());
             }
         }
         String clientId = oAuthAuthzReqMessageContext.getAuthorizationReqDTO().getConsumerKey();
@@ -373,7 +373,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer implements Scope
         List<String> requestedScopes = new ArrayList<>(Arrays.asList(tokReqMsgCtx.getScope()));
         boolean isRestrictApimRestApiScopes = ServiceReferenceHolder.isRestrictApimRestApiScopes();
         boolean isRestrictUnassignedScopes = ServiceReferenceHolder.isRestrictUnassignedScopes();
-        if (!(isRestrictUnassignedScopes && isRestrictApimRestApiScopes)) {
+        if (!isSystemScopeIssuerAvailable()) {
             for (String scope : requestedScopes) {
                 // If requestedScopes contains Product REST APIs (Publisher/DevPortal/Admin) scopes, just let
                 // them pass to the final scope list returned from RoleBasedScopeIssuer. This is because
@@ -388,7 +388,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer implements Scope
         String clientId = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         AuthenticatedUser authenticatedUser = tokReqMsgCtx.getAuthorizedUser();
         if (requestedScopes.isEmpty()) {
-            return getAllowedScopes(scopes);
+            return getAllowedScopes(new ArrayList<>());
         }
         Map<String, String> appScopes = getAppScopes(clientId, authenticatedUser, requestedScopes);
         if (appScopes != null) {
@@ -801,5 +801,16 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer implements Scope
             return currentRoleClaimValue;
         }
         return null;
+    }
+
+    private boolean isSystemScopeIssuerAvailable() {
+        String systemScopeIssuerClassName = "org.wso2.carbon.apimgt.impl.issuers.SystemScopesIssuer";
+        List<ScopeValidator> list = ServiceReferenceHolder.getInstance().getScopeValidators();
+        for (ScopeValidator scopeValidator : list) {
+            if (StringUtils.equalsIgnoreCase(scopeValidator.getName(), systemScopeIssuerClassName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
